@@ -45,6 +45,8 @@
 ## 编译
 > 使用PlatformIO加载项目
 > 
+> 删除 `data` 目录下的 `.keep`
+> 
 > 下载依赖
 > 
 > Build Filesystem Image 打包LittleFS镜像
