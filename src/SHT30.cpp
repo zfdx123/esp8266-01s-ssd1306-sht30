@@ -57,8 +57,8 @@ bool SHT30::readData(SHT30Data &s_data) const {
 	}
 
 	// 计算温湿度
-	int rawTemp = (data[0] << 8) | data[1];
-	int rawHumidity = (data[3] << 8) | data[4];
+	const int rawTemp = (data[0] << 8) | data[1];
+	const int rawHumidity = (data[3] << 8) | data[4];
 
 	s_data.rawTemperature = static_cast<float>(-45.0 + 175.0 * (rawTemp / 65535.0));
 	s_data.rawHumidity = static_cast<float>(100.0 * (rawHumidity / 65535.0));

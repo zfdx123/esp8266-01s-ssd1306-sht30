@@ -1,6 +1,8 @@
 
 #pragma once
 #include <ArduinoJson.h>
+#include <StreamString.h>
+#include "Begin.h"
 
 typedef struct HeFengCurrentData {
 	String cond_txt;
@@ -21,14 +23,15 @@ typedef struct HeFengForeData {
 
 class HeFeng {
 private:
-	static String getMeteoconIcon(const String &cond_code);
-	static bool httpsGet(const String &url, String &response);
+	HeFengConfig *_heFengConfig;
+	static String getMeteoConIcon(const String &cond_code);
+	bool httpsGet(const String &url, String &response) const;
 	static void setDefaultWeatherData(HeFengCurrentData *data);
 	static void setDefaultForecastData(HeFengForeData *data);
 	static String Decode(StreamString in);
 
 public:
-	HeFeng();
-	static void doUpdateCurr(HeFengCurrentData *data, const String &key, const String &location);
-	static void doUpdateFore(HeFengForeData *data, const String &key, const String &location);
+	explicit HeFeng(HeFengConfig *config);
+	void doUpdateCurr(HeFengCurrentData *data) const;
+	void doUpdateFore(HeFengForeData *data) const;
 };

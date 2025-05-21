@@ -1,0 +1,332 @@
+<!-- config.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>设备配置</title>
+    <style>
+        :root {
+            --primary: #2d8cf0;
+            --border: #e0e0e0;
+            --gap: 15px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fb;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .config-section {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: var(--gap);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .config-grid {
+            display: grid;
+            gap: var(--gap);
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin-top: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .input-group input {
+            width: 100%;
+            height: 38px;
+            padding: 0 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(45, 140, 240, 0.1);
+            outline: none;
+        }
+
+        .btn {
+            padding: 8px 25px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .flex-end {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.2rem; /* 小屏字号缩小 */
+            }
+
+            .btn {
+                padding: 6px 15px; /* 小屏按钮紧凑 */
+            }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-left: 5px solid #f00;
+            padding: 12px 20px;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 9999;
+            border-radius: 8px;
+            min-width: 200px;
+            max-width: 300px;
+            animation: fadeInOut 5s ease forwards;
+            font-family: sans-serif;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast .icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .toast .content {
+            display: inline-block;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="container header-content">
+        <h1 class="page-title">设备配置中心</h1>
+        <button class="btn" id="logoutBtn">注销</button>
+    </div>
+</header>
+
+<main class="container">
+    <section class="config-section">
+        <h2>📶 WiFi设置</h2>
+        <div class="config-grid">
+            <div class="input-group">
+                <label>SSID</label>
+                <input type="text" id="wifiSsid" placeholder="1-32位 字符">
+            </div>
+            <div class="input-group">
+                <label>密码</label>
+                <input type="password" id="wifiPassword" placeholder="0-64位 字符">
+            </div>
+            <div class="input-group">
+                <label>主机名</label>
+                <input type="text" id="wifiHostname" placeholder="小于32位 字符">
+            </div>
+        </div>
+    </section>
+
+    <section class="config-section">
+        <h2>⛅ 天气服务</h2>
+        <div class="config-grid">
+            <div class="input-group">
+                <label>API地址</label>
+                <input type="url" id="hefengUrl" placeholder="http/https">
+            </div>
+            <div class="input-group">
+                <label>API密钥</label>
+                <input type="text" id="hefengKey" placeholder="32位 Key">
+            </div>
+            <div class="input-group">
+                <label>地区代码</label>
+                <input type="text" id="hefengLocation" placeholder="9位地区ID">
+            </div>
+        </div>
+    </section>
+
+    <section class="config-section">
+        <h2>⚙️ 系统设置</h2>
+        <div class="config-grid">
+            <div class="input-group">
+                <label>管理端口</label>
+                <input type="number" id="webPort" placeholder="1-65535">
+            </div>
+            <div class="input-group">
+                <label>管理用户</label>
+                <input type="text" id="webUser" placeholder="4-20位 字符">
+            </div>
+            <div class="input-group">
+                <label>管理密码</label>
+                <input type="password" id="webPassword" placeholder="6-32位 字符">
+            </div>
+        </div>
+    </section>
+
+    <div class="flex-end">
+        <button class="btn" id="saveBtn">保存配置</button>
+    </div>
+</main>
+
+<script>
+    // 公共函数
+    const getVal = id => document.getElementById(id).value;
+
+    async function loadConfig() {
+        try {
+            const res = await fetch('/api/getConfig');
+            const config = await res.json();
+
+            // WiFi设置
+            document.getElementById('wifiSsid').value = config.wifi.ssid;
+            document.getElementById('wifiPassword').value = config.wifi.password;
+            document.getElementById('wifiHostname').value = config.wifi.hostname;
+
+            // 天气服务
+            document.getElementById('hefengUrl').value = config.hefeng.baseUrl;
+            document.getElementById('hefengKey').value = config.hefeng.key;
+            document.getElementById('hefengLocation').value = config.hefeng.location;
+
+            // 系统设置
+            document.getElementById('webPort').value = config.web.port;
+            document.getElementById('webUser').value = config.web.username;
+            document.getElementById('webPassword').value = config.web.password;
+        } catch (e) {
+            alert('配置加载失败');
+        }
+    }
+
+    async function saveConfig() {
+        const config = {
+            wifi: {
+                ssid: getVal('wifiSsid'),
+                password: getVal('wifiPassword'),
+                hostname: getVal('wifiHostname')
+            },
+            hefeng: {
+                baseUrl: getVal('hefengUrl'),
+                key: getVal('hefengKey'),
+                location: getVal('hefengLocation')
+            },
+            web: {
+                port: +getVal('webPort'),
+                username: getVal('webUser'),
+                password: getVal('webPassword')
+            }
+        };
+
+        try {
+            const res = await fetch('/api/updateConfig', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(config)
+            });
+
+            let result = { status: 'error', message: '' };
+            try {
+                result = await res.json(); // 即使是错误码也会尝试解析
+            } catch (err) {
+                result.message = '服务器响应不是有效 JSON。';
+            }
+
+            if (res.ok) {
+                showToast('success', "保存成功");
+            } else {
+                const errorMessage = result.message || `未知错误（状态码：${res.status}）`;
+                showToast('error', `保存失败：${errorMessage}`);
+            }
+        } catch (e) {
+            const networkError = e instanceof TypeError ? '网络连接失败，请检查服务器状态' : e.message;
+            showToast('error', `请求异常\n错误信息：${networkError}`);
+        }
+    }
+
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+        <span class="icon">${type === 'success' ? '✅' : '⚠️'}</span>
+        <div class="content">
+            <strong>${type === 'success' ? '成功' : '错误'}</strong>
+            <p>${message}</p>
+        </div>
+    `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    // 事件绑定
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/logout', {method: 'POST'});
+        window.location.href = '/';
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+        await saveConfig();
+    });
+    window.addEventListener('DOMContentLoaded', loadConfig);
+</script>
+</body>
+</html>

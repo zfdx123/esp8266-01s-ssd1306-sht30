@@ -7,10 +7,12 @@
 
 #include <map>
 
-HeFeng::HeFeng() = default;
+HeFeng::HeFeng(HeFengConfig *config) {
+	this->_heFengConfig = config;
+}
 
 String HeFeng::Decode(StreamString in) {
-	size_t size = in.available();
+	const size_t size = in.available();
 	uint8_t buf[size];
 	in.readBytes(buf, size);
 	uint8_t *outBuf = nullptr;
@@ -21,22 +23,20 @@ String HeFeng::Decode(StreamString in) {
 	return result;
 }
 
-void HeFeng::doUpdateCurr(HeFengCurrentData *data, const String &key, const String &location) {
-	String url = "https://devapi.qweather.com/v7/weather/now?location=" + location + "&key=" + key;
+void HeFeng::doUpdateCurr(HeFengCurrentData *data) const {
+	const String url = "/v7/weather/now?location=" + this->_heFengConfig->location;
 	Serial.println("[HTTPS] Fetching weather forecast data...");
 
-	String response;
-	if (httpsGet(url, response)) {
+	if (String response; this->httpsGet(url, response)) {
 		JsonDocument jsonBuffer;
-		DeserializationError error = deserializeJson(jsonBuffer, Decode(response));
 
-		if (!error) {
-			JsonObject root = jsonBuffer["now"];
+		if (const DeserializationError error = deserializeJson(jsonBuffer, Decode(response)); !error) {
+			const JsonObject root = jsonBuffer["now"];
 			data->tmp = root["temp"] | "-1";
 			data->fl = root["feelsLike"] | "-1";
 			data->hum = root["humidity"] | "-1";
 			data->wind_sc = root["windScale"] | "-1";
-			data->iconMeteoCon = getMeteoconIcon(root["icon"] | "999");
+			data->iconMeteoCon = getMeteoConIcon(root["icon"] | "999");
 			data->cond_txt = root["pressure"] | "-1";
 			root.clear();
 			jsonBuffer.clear();
@@ -58,24 +58,22 @@ void HeFeng::setDefaultWeatherData(HeFengCurrentData *data) {
 	data->iconMeteoCon = ")";
 }
 
-void HeFeng::doUpdateFore(HeFengForeData *data, const String &key, const String &location) {
-	String url = "https://devapi.qweather.com/v7/weather/3d?lang=en&&location=" + location + "&key=" + key;
+void HeFeng::doUpdateFore(HeFengForeData *data) const {
+	const String url = "/v7/weather/3d?lang=en&&location=" + this->_heFengConfig->location;
 	Serial.println("[HTTPS] Fetching weather forecast data...");
 
-	String response;
-	if (httpsGet(url, response)) {
+	if (String response; this->httpsGet(url, response)) {
 		JsonDocument jsonBuffer;
-		DeserializationError error = deserializeJson(jsonBuffer, Decode(response));
 
-		if (!error) {
-			JsonArray forecasts = jsonBuffer["daily"];
+		if (const DeserializationError error = deserializeJson(jsonBuffer, Decode(response)); !error) {
+			const JsonArray forecasts = jsonBuffer["daily"];
 			for (int i = 0; i < 3; i++) {
 				JsonObject day = forecasts[i];
 				data[i].tmp_min = day["tempMin"] | "-1";
 				data[i].tmp_max = day["tempMax"] | "-1";
 				data[i].datestr = day["fxDate"].as<String>().substring(5);
 				String cond_code = day["iconDay"] | "999";
-				data[i].iconMeteoCon = getMeteoconIcon(cond_code);
+				data[i].iconMeteoCon = getMeteoConIcon(cond_code);
 			}
 			forecasts.clear();
 			jsonBuffer.clear();
@@ -97,15 +95,15 @@ void HeFeng::setDefaultForecastData(HeFengForeData *data) {
 	}
 }
 
-bool HeFeng::httpsGet(const String &url, String &response) {
+bool HeFeng::httpsGet(const String &url, String &response) const {
 	const std::unique_ptr<BearSSL::WiFiClientSecure> client(new BearSSL::WiFiClientSecure);
 	client->setInsecure();
 
-	if (HTTPClient https; https.begin(*client, url)) {
+	if (HTTPClient https; https.begin(*client, this->_heFengConfig->baseUrl + url)) {
 		https.addHeader("Accept-Encoding", "gzip");
+		https.addHeader("X-QW-Api-Key", this->_heFengConfig->key);
 		https.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0");
-		int httpCode = https.GET();
-		if (httpCode > 0) {
+		if (const int httpCode = https.GET(); httpCode > 0) {
 			if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
 				response = https.getString();
 				https.end();
@@ -121,7 +119,7 @@ bool HeFeng::httpsGet(const String &url, String &response) {
 	return false;
 }
 
-String HeFeng::getMeteoconIcon(const String &cond_code) {
+String HeFeng::getMeteoConIcon(const String &cond_code) {
 	static const std::map<String, String> iconMap = {
 			{"100", "B"}, {"9006", "B"}, {"999", ")"}, {"104", "D"}, {"500", "E"}, {"503", "F"}, {"504", "F"},
 			{"507", "F"}, {"508", "F"},	 {"499", "G"}, {"901", "G"}, {"103", "H"}, {"502", "L"}, {"511", "L"},

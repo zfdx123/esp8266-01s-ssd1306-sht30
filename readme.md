@@ -43,7 +43,7 @@ SCL：连接到ESP8266-01S的GPIO2引脚(与SSD1306共用)。
 ```
 
 ## 配置文件
-> 配置文件位于 `data/config.json` (自行新建文件)
+> 配置文件位于 `data/config.json`
 > 
 > 使用时请删除注解
 
@@ -51,15 +51,17 @@ SCL：连接到ESP8266-01S的GPIO2引脚(与SSD1306共用)。
 {
   "wifi": {
     "ssid": "WiFi 名称",
-    "password": "WIFI 密码"
+    "password": "WIFI 密码",
+    "hostname": "ESP8266-01S"
   },
   "hefeng": {
     "key": "和风天气API Key",
     "location": "和风天气API 位置/坐标"
   },
   "web": {
-    "enable": true, // 是否启用Web服务(如果无法读取配置文件或wifi无法连接则该选项无效)
-    "port": 8080 // Web服务端口 默认 8080
+    "port": 8080,
+    "username": "Web服务用户名",
+    "password": "Web服务密码"
   }
 }
 ```
@@ -76,14 +78,17 @@ SCL：连接到ESP8266-01S的GPIO2引脚(与SSD1306共用)。
 > Upload 编译上传固件
 > 
 > Upload Filesystem Image 上传LittleFS镜像
-> 
 
-## API修改配置
-> 发送POST请求到 `http://192.168.4.1:8080/setConfig` 参数为配置文件内容
+## 配置
+> 打开浏览器访问 `URL_ADDRESS> 打开浏览器访问 `http://URL_ADDRESS:8080`
+>
+> 输入用户名和密码
+>
+> 输入和风天气API Key和位置ID以及基础URL
 > 
-> 获取当前配置 `http://192.168.4.1:8080/getConfig`
-> 
-> 重启 `http://192.168.4.1:8080/reboot`
-> 
-> 连接到wifi只要web启动即可修改配置
+> 输入WiFi名称和密码以及主机名称
+>
+> 点击保存
+>
+> 重启ESP8266-01S模块
 >
