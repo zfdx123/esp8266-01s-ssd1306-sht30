@@ -8,16 +8,16 @@
 #include <SSD1306Wire.h> //0.96寸用这个
 
 #include <Wire.h>
-#include "SHT30.h"
+#include "sht32/SHT30.h"
 
 #include <FS.h>
 #include <LittleFS.h>
 
 #include "Begin.h"
-#include "HeFeng.h"
-#include "WeatherStationFonts.h"
-#include "WeatherStationImages.h"
-#include "WebManager.h"
+#include "font/WeatherStationFonts.h"
+#include "font/WeatherStationImages.h"
+#include "hefeng/HeFeng.h"
+#include "web/WebManager.h"
 
 #define TZ 8 // 中国时区为8
 #define DST_MN 0 // 默认为0

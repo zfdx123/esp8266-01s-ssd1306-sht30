@@ -41,7 +41,7 @@ bool SHT30::readData(SHT30Data &s_data) const {
 	delay(15);
 
 	// 请求 6 字节数据
-	Wire.requestFrom(i2cAddress, (uint8_t) 6);
+	Wire.requestFrom(i2cAddress, static_cast<uint8_t>(6));
 	if (Wire.available() != 6) {
 		return false; // 数据长度不正确
 	}

@@ -1,7 +1,3 @@
-//
-// Created by 29154 on 2025/5/21.
-//
-
 #include "WebManager.h"
 
 #include <ArduinoJson.h>
@@ -11,6 +7,12 @@ WebManager::WebManager(WebConfig *config) {
 	this->_webConfig = config;
 	this->webServer = new ESP8266WebServer(this->_webConfig->port);
 	this->mdns = new MDNSResponder();
+}
+
+WebManager::~WebManager() {
+	delete this->webServer;
+	delete this->mdns;
+	delete this->_webConfig;
 }
 
 void WebManager::begin(const String &hostname) const {
@@ -30,6 +32,11 @@ void WebManager::loop() {
 
 void WebManager::on(const String &uri, const HTTPMethod method, const std::function<void()> &callback) const {
 	this->webServer->on(uri, method, callback);
+}
+
+void WebManager::on(const String &uri, const HTTPMethod method, const std::function<void()> &callback,
+					const std::function<void()> &u_function) const {
+	this->webServer->on(uri, method, callback, u_function);
 }
 
 void WebManager::staticFS(const String &uri, const String &filename) const {
@@ -90,6 +97,11 @@ void WebManager::handleFileRead(const String &path) const {
 	}
 
 	File file = LittleFS.open(path, "r");
+	if (!file) {
+		this->webServer->send(500, "application/json", R"({"error": "File open failed"})");
+		return;
+	}
+
 	this->webServer->streamFile(file, contentType);
 	file.close();
 }
@@ -104,7 +116,7 @@ void WebManager::defaultRoute() {
 		this->webServer->send(302);
 	});
 
-	this->on("/login.html", HTTP_GET, [this]() { handleFileRead("/login.html"); });
+	this->on("/login.html", HTTP_GET, [this]() { handleFileRead("/login.html.gz"); });
 
 	this->on("/config.html", HTTP_GET, [this]() {
 		if (!this->verify()) {
@@ -114,7 +126,7 @@ void WebManager::defaultRoute() {
 			this->webServer->send(301);
 			return;
 		}
-		handleFileRead("/config.html");
+		handleFileRead("/config.html.gz");
 	});
 
 	this->on("/api/login", HTTP_POST, [this]() {
@@ -173,6 +185,7 @@ void WebManager::defaultRoute() {
 		this->webServer->send(200, "application/json", file.readString());
 		file.close();
 	});
+
 	this->on("/api/updateConfig", HTTP_POST, [this]() {
 		if (!this->verify()) {
 			this->webServer->send(403, "application/json", R"({"status":"error","message":"Unauthorized"})");
