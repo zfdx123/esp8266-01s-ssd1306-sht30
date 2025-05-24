@@ -144,7 +144,7 @@ void WebManager::defaultRoute() {
 			activeSessions[token] = {token, expire};
 
 			this->webServer->sendHeader("Set-Cookie", "AuthToken=" + token + "; Max-Age=3600; Path=/; HttpOnly");
-			this->webServer->send(200, "application/json", R"({"status":"ok"})");
+			this->webServer->send(200, "application/json", R"({"status":"success"})");
 		} else {
 			this->webServer->send(403, "application/json", R"({"status":"error","message":"Unauthorized"})");
 		}
@@ -165,6 +165,31 @@ void WebManager::defaultRoute() {
 		}
 		this->webServer->sendHeader("Set-Cookie", "AuthToken=deleted; Path=/; Max-Age=0");
 		this->webServer->send(200, "application/json", R"({"status":"logged_out"})");
+	});
+
+	this->on("/api/wifi", HTTP_GET, [this]() {
+		if (!this->verify()) {
+			this->webServer->send(403, "application/json", R"({"status":"error","message":"Unauthorized"})");
+			return;
+		}
+
+		const auto wifi = WiFi.scanNetworks();
+		if (wifi == 0) {
+			this->webServer->send(200, "application/json", "[]");
+			return;
+		}
+
+		JsonDocument doc;
+		const JsonArray networks = doc.to<JsonArray>();
+		for (int i = 0; i < wifi; i++) {
+			auto network = networks.add<JsonObject>();
+			network["ssid"] = WiFi.SSID(i);
+			network["rssi"] = WiFi.RSSI(i);
+		}
+
+		this->webServer->send(200, "application/json", doc.as<String>());
+		networks.clear();
+		doc.clear();
 	});
 
 	this->on("/api/getConfig", HTTP_GET, [this]() {
@@ -272,6 +297,6 @@ void WebManager::defaultRoute() {
 		serializeJsonPretty(doc, configFile);
 		configFile.close();
 
-		this->webServer->send(200, "application/json", R"({"status":"ok"})");
+		this->webServer->send(200, "application/json", R"({"status":"success"})");
 	});
 }

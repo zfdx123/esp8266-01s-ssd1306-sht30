@@ -32,7 +32,7 @@ void HeFeng::doUpdateCurr(HeFengCurrentData *data) const {
 	if (String response; this->httpsGet(url, response)) {
 		JsonDocument jsonBuffer;
 
-		if (const DeserializationError error = deserializeJson(jsonBuffer, this->Decode(response)); !error) {
+		if (const DeserializationError error = deserializeJson(jsonBuffer, HeFeng::Decode(response)); !error) {
 			const JsonObject root = jsonBuffer["now"];
 			data->tmp = root["temp"] | "-1";
 			data->fl = root["feelsLike"] | "-1";
@@ -66,7 +66,7 @@ void HeFeng::doUpdateFore(HeFengForeData *data) const {
 
 	if (String response; this->httpsGet(url, response)) {
 		JsonDocument jsonBuffer;
-		if (const DeserializationError error = deserializeJson(jsonBuffer, this->Decode(response)); !error) {
+		if (const DeserializationError error = deserializeJson(jsonBuffer, HeFeng::Decode(response)); !error) {
 			const JsonArray forecasts = jsonBuffer["daily"];
 			for (int i = 0; i < 3; i++) {
 				JsonObject day = forecasts[i];
@@ -97,27 +97,36 @@ void HeFeng::setDefaultForecastData(HeFengForeData *data) {
 }
 
 bool HeFeng::httpsGet(const String &url, String &response) const {
-	if (HTTPClient https; https.begin(*this->client, this->_heFengConfig->baseUrl + url)) {
-		https.addHeader("Accept-Encoding", "gzip");
-		https.addHeader("X-QW-Api-Key", this->_heFengConfig->key);
-		https.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0");
-		if (const int httpCode = https.GET(); httpCode > 0) {
-			if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-				response = https.getString();
-				https.end();
-				this->client->stop();
-				return true;
-			}
-		} else {
-			Serial.printf("[HTTPS] GET... failed, error: %s\n", HTTPClient::errorToString(httpCode).c_str());
-		}
-		https.end();
-		this->client->stop();
-	} else {
+	HTTPClient https;
+	https.setReuse(false);
+
+	if (!https.begin(*this->client, this->_heFengConfig->baseUrl + url)) {
 		Serial.println("[HTTPS] Unable to connect");
+		return false;
 	}
+
+	https.addHeader("Accept-Encoding", "gzip");
+	https.addHeader("X-QW-Api-Key", this->_heFengConfig->key);
+	https.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0");
+
+	int httpCode = https.GET();
+	if (httpCode > 0) {
+		if (httpCode == HTTP_CODE_OK) {
+			response = https.getString();
+			https.end();
+			this->client->stop();
+			return true;
+		}
+		Serial.printf("[HTTPS] GET returned httpCode=%d\n", httpCode);
+	} else {
+		Serial.printf("[HTTPS] GET failed, error: %s\n", HTTPClient::errorToString(httpCode).c_str());
+	}
+
+	https.end();
+	this->client->stop();
 	return false;
 }
+
 
 String HeFeng::getMeteoConIcon(const String &cond_code) {
 	static const std::map<String, String> iconMap = {

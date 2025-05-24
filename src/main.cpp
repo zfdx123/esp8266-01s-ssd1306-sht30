@@ -23,7 +23,6 @@
 #define DST_MN 0 // 默认为0
 
 constexpr int UPDATE_INTERVAL_SECS = 5 * 60; // 5分钟更新一次天气
-constexpr int UPDATE_CURR_INTERVAL_SECS = 60 * 60; // 2分钟更新一次粉丝数
 constexpr int UPDATE_SHT30_INTERVAL_SECS = 1; // 5秒更新一次SHT30
 
 constexpr int SHT31_ADDRESS = 0x44;
