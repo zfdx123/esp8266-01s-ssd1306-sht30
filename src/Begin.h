@@ -24,9 +24,38 @@ typedef struct HeFengConfig {
 	String baseUrl;
 
 	[[nodiscard]] bool validate() const {
-		return key.length() == 32 && // 假设key是32位
-			   location.length() == 9 && // 假设location是9位
-			   baseUrl.startsWith("http");
+		// 验证key是32位
+		if (key.length() != 32) {
+			return false;
+		}
+
+		// 验证location是9位数字或经纬度格式
+		bool locationValid = false;
+		if (location.length() == 9) {
+			// 检查是否全是数字
+			locationValid = true;
+			for (char c : location) {
+				if (!isdigit(c)) {
+					locationValid = false;
+					break;
+				}
+			}
+		} else {
+			// 检查是否是经纬度格式 "经度,纬度"
+			if (const int commaPos = location.indexOf(','); commaPos != -1) {
+				const String longitude = location.substring(0, commaPos);
+				const String latitude = location.substring(commaPos + 1);
+				// 简单验证 - 可以根据需要添加更复杂的验证
+				locationValid = longitude.length() > 0 && latitude.length() > 0;
+			}
+		}
+
+		// 验证baseUrl以http开头
+		if (!baseUrl.startsWith("http")) {
+			return false;
+		}
+
+		return locationValid;
 	}
 } HeFengConfig;
 

@@ -41,7 +41,6 @@ public:
 	[[nodiscard]] bool authenticate(const String &username, const String &password) const;
 	[[nodiscard]] static String generateToken() ;
 	void defaultRoute();
-	void handleUpdateError(const String &message) const;
 };
 
 #endif //WEBMANAGER_H

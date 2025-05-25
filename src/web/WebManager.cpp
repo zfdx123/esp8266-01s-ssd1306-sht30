@@ -18,7 +18,9 @@ WebManager::~WebManager() {
 void WebManager::begin(const String &hostname) const {
 	this->webServer->begin();
 	this->mdns->begin(hostname);
-	MDNS.addService("http", "tcp", this->_webConfig->port);
+	if (this->mdns->addService("http", "tcp", this->_webConfig->port)) {
+		Serial.println("MDNS server started");
+	}
 }
 
 void WebManager::loop() {
@@ -116,7 +118,7 @@ void WebManager::defaultRoute() {
 		this->webServer->send(302);
 	});
 
-	this->on("/login.html", HTTP_GET, [this]() { handleFileRead("/login.html.gz"); });
+	this->on("/login.html", HTTP_GET, [this]() { handleFileRead("/html/login.html.gz"); });
 
 	this->on("/config.html", HTTP_GET, [this]() {
 		if (!this->verify()) {
@@ -126,7 +128,7 @@ void WebManager::defaultRoute() {
 			this->webServer->send(301);
 			return;
 		}
-		handleFileRead("/config.html.gz");
+		handleFileRead("/html/config.html.gz");
 	});
 
 	this->on("/api/login", HTTP_POST, [this]() {

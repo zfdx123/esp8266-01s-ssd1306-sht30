@@ -113,6 +113,7 @@ void setup() {
 	display.flipScreenVertically(); // 屏幕翻转
 	display.setContrast(255); // 屏幕亮度
 
+	display.clear();
 	if (!LittleFS.begin()) {
 		displayStatus(2, 1,"LittleFS.begin() failed ");
 		Serial.println("LittleFS.begin() failed");
