@@ -79,6 +79,7 @@ void drawHeaderOverlay(OLEDDisplay *display, OLEDDisplayUiState *state);
 void drawHeaderOverlayTmp(OLEDDisplay *display, OLEDDisplayUiState *state);
 void setReadyForWeatherUpdate();
 bool loadConfig(BeginSettings &beginSettings);
+void wifi_event_handler(System_Event_t *event);
 void WifiAP();
 bool wifiConnect();
 int16_t add_draw(int arg1, int arg2);
@@ -146,6 +147,8 @@ void setup() {
 		wifiConnected = false;
 		return;
 	}
+
+	wifi_set_event_handler_cb(wifi_event_handler);
 
 	hefeng = new HeFeng(&beginSettings.heFengConfig);
 
@@ -265,6 +268,12 @@ bool loadConfig(BeginSettings &beginSettings) {
 	configFile.close();
 
 	return true;
+}
+
+void wifi_event_handler(System_Event_t *event) {
+	if (event->event == EVENT_STAMODE_GOT_IP) {
+		readyForWeatherUpdate = true;
+	}
 }
 
 void WifiAP() {
